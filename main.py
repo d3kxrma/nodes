@@ -124,7 +124,12 @@ def link_callback(sender, app_data):
     print(sender)
     print(app_data)
     print("^^^")
-    
+
+# callback runs when user attempts to disconnect attributes
+def delink_callback(sender, app_data):
+    # app_data -> link_id
+    dpg.delete_item(app_data)
+
 def call(sender, app_data):
     print(sender)
     print(app_data)
@@ -148,11 +153,6 @@ def run_callback(sender, app_data, user_data):
         open_modal_callback("Run is not possible because no chains have been detected.")
 
 
-# callback runs when user attempts to disconnect attributes
-def delink_callback(sender, app_data):
-    # app_data -> link_id
-    dpg.delete_item(app_data)
-
 def input_node(sender, app_data, user_data):
     i = InputNode()
     i.spawn()
@@ -160,6 +160,10 @@ def input_node(sender, app_data, user_data):
 def sum_node(sender, app_data, user_data):
    s = SumNode()
    s.spawn()
+   
+def mul_node(sender, app_data, user_data):
+   m = MulNode()
+   m.spawn()
 
 def output_node(sender, app_data, user_data):
     o = OutNode()
@@ -169,7 +173,7 @@ with dpg.window(label="Tutorial", width=1000, height=700):
     with dpg.group(horizontal=True):
         dpg.add_button(label="run", callback=run_callback)
         dpg.add_button(label="input", callback=input_node)
-        dpg.add_button(label="multiply", callback=MulNode().spawn)
+        dpg.add_button(label="multiply", callback=mul_node)
         dpg.add_button(label="sum", callback=sum_node)
         dpg.add_button(label="output", callback=output_node)
     
