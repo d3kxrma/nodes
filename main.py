@@ -1,22 +1,45 @@
 import dearpygui.dearpygui as dpg
-import time
 dpg.create_context()
+
 """
-баг з трьома арефметичними діями
+панель для додавання нодів, використавння бейз ноди, по можливості розширена інформація про ноди, валідація вихідних та вхідниї даних (типи)
 """
 
 class InputNode:
+    def __init__(self):
+        self.name = "Number Input"
+    
     def spawn(self):
-        with dpg.node(label="Number input", parent="editor", user_data=self) as f:
-            self.f = f
-            with dpg.node_attribute(label="Float input", attribute_type=dpg.mvNode_Attr_Output):
-                self.inp = dpg.add_input_float(width=150)
-                dpg.add_text(dpg.get_item_parent(dpg.get_item_parent(self.inp)))
+        with dpg.node(label=self.name, parent="editor", user_data=self) as tag:
+            self.tag = tag
+            self.design()
+        self.popup()
+    
+    def design(self):
+        with dpg.node_attribute(label="Float input", attribute_type=dpg.mvNode_Attr_Output):
+            self.inp = dpg.add_input_float(width=150)
+            dpg.add_text(dpg.get_item_parent(dpg.get_item_parent(self.inp)))
+    
+    def delete(self):
+        for pin in dpg.get_item_children(self.tag)[1]:
+            conf = dpg.get_item_configuration(pin)
+            if conf.get("attribute_type") == 1:
+                if conf.get("user_data") and conf.get(conf.get("user_data")):
+                    dpg.set_item_user_data(conf.get("user_data"), None)
+        dpg.delete_item(self.tag)
+    
+    def duplicate(self):
+        i = InputNode()
+        i.spawn()
+    
+    def popup(self):
+        with dpg.popup(self.tag, mousebutton=dpg.mvMouseButton_Right):
+                dpg.add_menu_item(label="Delete", callback=self.delete)
+                dpg.add_menu_item(label="Duplicate", callback=self.duplicate)
+                dpg.add_separator()
+                dpg.add_menu_item(label="Close")
     
     def calculate(self):
-        dpg.set_item_label(self.f, "HERE")
-        time.sleep(1)
-        dpg.set_item_label(self.f, "Number input")
         return dpg.get_value(self.inp)
         
 class SumNode:
@@ -45,11 +68,9 @@ class SumNode:
     #         self.A2 = children
     
     def calculate(self):
-        dpg.set_item_label(self.f, "HERE")
         res = dpg.get_item_user_data(self.A1).calculate() + dpg.get_item_user_data(self.A2).calculate()
         dpg.set_value(item = self.r, value = f"Result: {res}")
-        time.sleep(1)
-        dpg.set_item_label(self.f, "Summa")
+    
         return res
 
 class MulNode:
@@ -70,7 +91,7 @@ class MulNode:
             with dpg.node_attribute(label="Float Output", attribute_type=dpg.mvNode_Attr_Output):
                 self.r = dpg.add_text("Result")
                 dpg.add_text(dpg.get_item_parent(dpg.get_item_parent(self.r)))
-    
+        return self.f
     # def set_children(self, children):
     #     if not self.A1:
     #         self.A1 = children
@@ -78,13 +99,8 @@ class MulNode:
     #         self.A2 = children
     
     def calculate(self):
-        print(self.A1, self.A2)
-        print(self)
-        dpg.set_item_label(self.f, "HERE")
         res = dpg.get_item_user_data(self.A1).calculate() * dpg.get_item_user_data(self.A2).calculate()
         dpg.set_value(item = self.r, value = f"Result: {res}")
-        time.sleep(1)
-        dpg.set_item_label(self.f, "Multiply")
         return res
 
 class OutNode:
@@ -104,9 +120,9 @@ class OutNode:
     #     self.A1 = children
             
     def calculate(self):
-        dpg.set_item_label(self.f, "HERE")
+        
         dpg.set_value(item = self.txt, value = f"Result: {dpg.get_item_user_data(self.A1).calculate()}")
-        time.sleep(1)
+        
         dpg.set_item_label(self.f, "Output")
         
 def open_modal_callback(text: str, name:str="Error"):
@@ -115,19 +131,29 @@ def open_modal_callback(text: str, name:str="Error"):
         dpg.add_button(label="Close", callback=lambda: dpg.delete_item("modal_window"))
     dpg.show_item("modal_window")
 
-# callback runs when user attempts to connect attributes
 def link_callback(sender, app_data):
     # app_data -> (link_id1, link_id2)
     left_parent = dpg.get_item_parent(app_data[0])
     dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=left_parent)
     dpg.set_item_user_data(app_data[1], dpg.get_item_user_data(left_parent))
+    dpg.set_item_user_data(app_data[0], app_data[1])
     print(sender)
     print(app_data)
     print("^^^")
 
-# callback runs when user attempts to disconnect attributes
 def delink_callback(sender, app_data):
     # app_data -> link_id
+    # print(dpg.get_item_children("editor"))
+    # print(sender)
+    # print(app_data)
+    # print(dpg.get_item_user_data(app_data))
+    # print(dpg.get_item_configuration(app_data))
+    conf = dpg.get_item_configuration(app_data)
+    right = conf.get("attr_2")
+    left = conf.get("attr_1")
+    dpg.set_item_user_data(right, None)
+    dpg.set_item_user_data(left, None)
+    
     dpg.delete_item(app_data)
 
 def call(sender, app_data):
@@ -136,7 +162,13 @@ def call(sender, app_data):
 
 def run_callback(sender, app_data, user_data):
     print(dpg.get_item_children("editor"))
-    nodes: list = dpg.get_item_children("editor")[1]
+    editor_children = dpg.get_item_children("editor")
+    
+    if not editor_children[0]: # if any connection exists
+        open_modal_callback("No connection found. Connect at least 2 nodes.")
+        return
+    
+    nodes: list = editor_children[1]
     for x in dpg.get_item_children("editor")[0]:
         # print(lid)
         # left: InputNode = dpg.get_item_user_data(lid)
@@ -151,7 +183,6 @@ def run_callback(sender, app_data, user_data):
         open_modal_callback("Run is not possible due to 2 or more chains detected. Remove all unnecessary chains.")
     else:
         open_modal_callback("Run is not possible because no chains have been detected.")
-
 
 def input_node(sender, app_data, user_data):
     i = InputNode()
@@ -180,6 +211,27 @@ with dpg.window(label="Tutorial", width=1000, height=700):
     
     with dpg.node_editor(callback=link_callback, delink_callback=delink_callback, minimap=True, minimap_location=3, tag="editor"):
         pass
+    
+def delete_callback(): 
+    nodes = dpg.get_selected_nodes("editor")
+    for node in nodes:
+        for pin in dpg.get_item_children(node)[1]:
+            conf = dpg.get_item_configuration(pin)
+            if conf.get("attribute_type") == 1:
+                if conf.get("user_data") and conf.get(conf.get("user_data")):
+                    dpg.set_item_user_data(conf.get("user_data"), None)
+        dpg.delete_item(node)
+    
+    links = dpg.get_selected_links("editor")
+    for link in links:
+        conf = dpg.get_item_configuration(link)
+        dpg.set_item_user_data(conf.get("attr_1"), None)
+        dpg.set_item_user_data(conf.get("attr_2"), None)
+        dpg.delete_item(link)
+        
+with dpg.handler_registry():
+    dpg.add_key_release_handler(key=dpg.mvKey_Delete, callback=delete_callback)
+
 
 dpg.create_viewport(title='Custom Title', width=800, height=600)
 dpg.setup_dearpygui()
