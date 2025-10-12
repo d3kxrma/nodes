@@ -16,15 +16,14 @@ class MathNode(Node):
         with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input) as sd:
             self.sd = sd
             dpg.add_text("Second digit")
-            dpg.add_separator()
         
         with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
             dpg.add_combo(
                 items=["+", "-", "*", "/", "//", "%"],
                 default_value="+",
-                callback=self.on_select
+                callback=self.on_select,
+                width=50
             )
-            dpg.add_separator()
         
         with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
             self.r = dpg.add_text("Result")

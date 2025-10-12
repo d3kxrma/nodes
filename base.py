@@ -8,12 +8,18 @@ class Node:
     def __init__(self):
         self.name = "Base Node"
 
-    def spawn(self):
+    def spawn(self, pos:list[int]=[0, 0]):
         """
         Node creation function. Creates the node itself and calls other functions. 
         Usually, no changes are required.
         """
-        with dpg.node(label=self.name, parent="editor", user_data=self) as tag:
+        if pos == [0, 0]: 
+            editor_size = dpg.get_item_rect_size("editor")
+            editor_pos = dpg.get_item_pos("editor")
+            pos = [editor_pos[0]+editor_size[0]//2, editor_pos[1]+editor_size[1]//2]
+        
+        
+        with dpg.node(label=self.name, parent="editor", user_data=self, pos=pos) as tag:
             self.tag = tag
             self.design()
         self.popup()
