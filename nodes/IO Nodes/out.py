@@ -3,7 +3,7 @@ from base import Node
 
 class OutNode(Node):
     def __init__(self):
-        self.name = "Output"
+        super().__init__(name="Output")
     
     def design(self):
         with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input) as i:
@@ -11,4 +11,5 @@ class OutNode(Node):
             self.txt = dpg.add_text("output")
     
     def calculate(self):
-        dpg.set_value(item = self.txt, value = f"Result: {dpg.get_item_user_data(self.i).calculate()}")
+        
+        dpg.set_value(item = self.txt, value = f"Result: {self.get_value(self.i)}")

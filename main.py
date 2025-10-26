@@ -11,26 +11,50 @@ def open_modal_callback(text: str, name: str = "Error"):
     with dpg.window(label=name, modal=True, show=False, tag="modal_window"):
         dpg.add_text(text)
         dpg.add_button(label="Close", callback=lambda: dpg.delete_item("modal_window"))
+    dpg.set_value("info_text", text)
     dpg.show_item("modal_window")
 
 
 def link_callback(sender, app_data):
+    out_data = dpg.get_item_user_data(app_data[0])
+    inp_data = dpg.get_item_user_data(app_data[1])
+    
+    out_type = out_data.get("data_type")
+    inp_type = inp_data.get("data_type")
+    
+    if inp_type != out_type and inp_type is not None:
+        open_modal_callback(f"Type mismatch: cannot connect {out_type.__name__} to {inp_type.__name__}.")
+        return
+    
     left_parent = dpg.get_item_parent(app_data[0])
     dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=left_parent)
-    dpg.set_item_user_data(app_data[1], dpg.get_item_user_data(left_parent))
-    dpg.set_item_user_data(app_data[0], app_data[1])
+    
+    # inp_data["left_node"] = dpg.get_item_user_data(left_parent)
+    inp_data["left_node"] = app_data[0]
+    out_data["right_node"] = app_data[1]
+    
+    dpg.set_item_user_data(app_data[1], inp_data)
+    dpg.set_item_user_data(app_data[0], out_data)
+    
 
 
 def delink_callback(sender, app_data):
     conf = dpg.get_item_configuration(app_data)
     right = conf.get("attr_2")
     left = conf.get("attr_1")
-    dpg.set_item_user_data(right, None)
-    dpg.set_item_user_data(left, None)
+    
+    right_data = dpg.get_item_user_data(right)
+    left_data = dpg.get_item_user_data(left)
+    
+    del right_data["left_node"]
+    del left_data["right_node"]
+
+    dpg.set_item_user_data(right, right_data)
+    dpg.set_item_user_data(left, left_data)
     dpg.delete_item(app_data)
 
 
-def run_callback(sender, app_data, user_data):
+def run_callback():
     editor_children = dpg.get_item_children("editor")
     if not editor_children[0]:  # if any connection exists
         open_modal_callback("No connection found. Connect at least 2 nodes.")
@@ -57,13 +81,20 @@ def delete_callback():
     links = dpg.get_selected_links("editor")
     for link in links:
         conf = dpg.get_item_configuration(link)
-        dpg.set_item_user_data(conf.get("attr_1"), None)
-        dpg.set_item_user_data(conf.get("attr_2"), None)
+        
+        left_data = dpg.get_item_user_data(conf.get("attr_1"))
+        right_data = dpg.get_item_user_data(conf.get("attr_2"))
+        del left_data["right_node"]
+        del right_data["left_node"]
+        
+        dpg.set_item_user_data(conf.get("attr_1"), left_data)
+        dpg.set_item_user_data(conf.get("attr_2"), right_data)
         dpg.delete_item(link)
 
 
 with dpg.handler_registry():
     dpg.add_key_release_handler(key=dpg.mvKey_Delete, callback=delete_callback)
+    dpg.add_key_release_handler(key=dpg.mvKey_F5, callback=run_callback)
 
 def load_node_classes():
     node_map = {}
@@ -119,7 +150,7 @@ with dpg.window(label="Main", tag="main"):
         
     with dpg.group(horizontal=True, height=20):
         dpg.add_button(label="run", callback=run_callback)
-        dpg.add_text("Info")
+        dpg.add_text("Info", tag="info_text")
 
 
 dpg.create_viewport(title='Node editor', width=1280, height=720)
