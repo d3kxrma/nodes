@@ -136,7 +136,27 @@ def create_nodes_panel(node_map):
                             node.spawn()
                         return callback
 
-                    dpg.add_button(label=class_name, callback=make_callback(cls))
+                    btn = dpg.add_button(label=class_name, callback=make_callback(cls))
+                    with dpg.drag_payload(parent=btn, drag_data=cls):
+                        dpg.add_text(class_name)
+                    
+def on_drop(sender, app_data, user_data):
+    pos = dpg.get_mouse_pos(local=False)
+    ref_node = dpg.get_item_children("editor", slot=1)
+    if not ref_node:
+        ref_screen_pos = [0, 0]
+        ref_grid_pos = [0, 0]
+    else:
+        ref_node = ref_node[-1]
+        ref_screen_pos = dpg.get_item_rect_min(ref_node)
+        ref_grid_pos = dpg.get_item_pos(ref_node)
+        
+    NODE_PADDING = (15, 8)
+
+    pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
+    pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
+    node = app_data()
+    node.spawn(pos)
 
 
 with dpg.window(label="Main", tag="main"):
@@ -144,9 +164,10 @@ with dpg.window(label="Main", tag="main"):
         with dpg.group(horizontal=True):
             node_map = load_node_classes()
             create_nodes_panel(node_map)
-
-            with dpg.node_editor(callback=link_callback, delink_callback=delink_callback, minimap=True, minimap_location=3, tag="editor"):
-                pass
+            
+            with dpg.group(drop_callback=on_drop):
+                with dpg.node_editor(callback=link_callback, delink_callback=delink_callback, minimap=True, minimap_location=3, tag="editor"):
+                    pass
         
     with dpg.group(horizontal=True, height=20):
         dpg.add_button(label="run", callback=run_callback)
