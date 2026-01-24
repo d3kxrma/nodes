@@ -2,8 +2,8 @@ import dearpygui.dearpygui as dpg
 from base import Node
 
 class MathNode(Node):
+    name = "Math operations"
     def __init__(self):
-        super().__init__(name="Math operations")
         self.operation = "+"
     
     def on_select(self, sender, app_data, user_data):

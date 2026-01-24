@@ -99,13 +99,13 @@ with dpg.handler_registry():
 def load_node_classes():
     node_map = {}
 
-    for category in os.listdir(NODES_DIR):
+    for category in sorted(os.listdir(NODES_DIR)):
         category_path = os.path.join(NODES_DIR, category)
         if not os.path.isdir(category_path):
             continue
 
-        category_nodes = {}
-        for filename in os.listdir(category_path):
+        category_nodes = []
+        for filename in sorted(os.listdir(category_path)):
             if filename.endswith(".py") and filename != "__init__.py":
                 module_name = f"{NODES_DIR}.{category}.{filename[:-3]}"
                 module = importlib.import_module(module_name)
@@ -113,7 +113,7 @@ def load_node_classes():
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
                     if isinstance(attr, type) and issubclass(attr, Node) and attr is not Node:
-                        category_nodes[attr_name] = attr
+                        category_nodes.append(attr)
 
         if category_nodes:
             node_map[category] = category_nodes
@@ -121,14 +121,16 @@ def load_node_classes():
     return node_map
 
 
-def create_nodes_panel(node_map):
+def create_nodes_panel(node_map:dict):
     with dpg.child_window(width=250, border=True):
         
         for category, classes in node_map.items():
             
             with dpg.collapsing_header(label=category, default_open=True):
                 
-                for class_name, cls in classes.items():
+                for cls in classes:
+                    if not cls.visible:
+                        continue
                     
                     def make_callback(cls):
                         def callback(sender, app_data, user_data):
@@ -136,9 +138,9 @@ def create_nodes_panel(node_map):
                             node.spawn()
                         return callback
 
-                    btn = dpg.add_button(label=class_name, callback=make_callback(cls))
+                    btn = dpg.add_button(label=cls.name, callback=make_callback(cls))
                     with dpg.drag_payload(parent=btn, drag_data=cls):
-                        dpg.add_text(class_name)
+                        dpg.add_text(cls.name)
                     
 def on_drop(sender, app_data, user_data):
     pos = dpg.get_mouse_pos(local=False)
@@ -174,7 +176,7 @@ with dpg.window(label="Main", tag="main"):
         dpg.add_text("Info", tag="info_text")
 
 
-dpg.create_viewport(title='Node editor', width=1280, height=720)
+dpg.create_viewport(title='Node editor', width=1280, height=720, x_pos=500, y_pos=500)
 dpg.set_primary_window("main", True)
 dpg.setup_dearpygui()
 dpg.show_viewport()

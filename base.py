@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 import dearpygui.dearpygui as dpg
 
 class Node(ABC):
+    name = "Base Node"
+    visible = True
     """
     Base node class. All created nodes must inherit from this class. 
     If you want to create your own node, you need to write a class that inherits from this class and change the design and calculate functions.
     """
-    def __init__(self, name:str):
-        self.name = name
 
     def spawn(self, pos:list[int]=[0, 0]):
         """

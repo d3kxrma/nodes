@@ -2,8 +2,7 @@ import dearpygui.dearpygui as dpg
 from base import Node
 
 class OutNode(Node):
-    def __init__(self):
-        super().__init__(name="Output")
+    name = "Output"
     
     def design(self):
         with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input) as i:
