@@ -22,7 +22,7 @@ class ApplyNode(Node):
         if df is not None and col in df.columns and expr:
             try:
                 new_df = df.copy()
-                # Створюємо функцію з рядка безпечним способом
+
                 fn = eval(f"lambda x: {expr}")
                 new_df[col] = new_df[col].apply(fn)
                 return new_df

@@ -1,0 +1,276 @@
+{
+    "nodes": {
+        "145": {
+            "class_name": "ReadTableNode",
+            "pos": [
+                68,
+                80
+            ],
+            "values": {
+                "file_dialog_id": true,
+                "inp": "./example.csv",
+                "chk": true
+            }
+        },
+        "158": {
+            "class_name": "ViewNode",
+            "pos": [
+                372,
+                78
+            ],
+            "values": {
+                "inp": 5,
+                "table_id": ""
+            }
+        },
+        "171": {
+            "class_name": "DropColumnsNode",
+            "pos": [
+                92,
+                327
+            ],
+            "values": {
+                "cols_input": "Name, Ticket, Cabin"
+            }
+        },
+        "184": {
+            "class_name": "ViewNode",
+            "pos": [
+                374,
+                327
+            ],
+            "values": {
+                "inp": 5,
+                "table_id": ""
+            }
+        },
+        "197": {
+            "class_name": "KNNImputerNode",
+            "pos": [
+                425,
+                572
+            ],
+            "values": {
+                "n_neighbors": 8
+            }
+        },
+        "210": {
+            "class_name": "EncoderNode",
+            "pos": [
+                79,
+                540
+            ],
+            "values": {
+                "encoder_type": "Ordinal Encoder",
+                "cols_input": ""
+            }
+        },
+        "224": {
+            "class_name": "ScalerNode",
+            "pos": [
+                679,
+                628
+            ],
+            "values": {
+                "scaler_type": "Standard Scaler",
+                "cols_input": ""
+            }
+        },
+        "238": {
+            "class_name": "ViewNode",
+            "pos": [
+                97,
+                739
+            ],
+            "values": {
+                "inp": 5,
+                "table_id": ""
+            }
+        },
+        "251": {
+            "class_name": "SplitXYNode",
+            "pos": [
+                701,
+                361
+            ],
+            "values": {
+                "target_input": "Survived"
+            }
+        },
+        "266": {
+            "class_name": "TrainTestSplitNode",
+            "pos": [
+                1045,
+                282
+            ],
+            "values": {
+                "test_size": 0.20000000298023224,
+                "random_state": 42
+            }
+        },
+        "289": {
+            "class_name": "FitNode",
+            "pos": [
+                1385,
+                162
+            ],
+            "values": {}
+        },
+        "305": {
+            "class_name": "PredictNode",
+            "pos": [
+                1580,
+                186
+            ],
+            "values": {}
+        },
+        "319": {
+            "class_name": "MetricsNode",
+            "pos": [
+                1750,
+                222
+            ],
+            "values": {
+                "txt_acc": "Accuracy: 0.8045",
+                "txt_prec": "Precision: 0.8036",
+                "txt_rec": "Recall: 0.8045",
+                "txt_f1": "F1 Score: 0.8038"
+            }
+        },
+        "349": {
+            "class_name": "HistGradientBoostingClassifierNode",
+            "pos": [
+                1043,
+                144
+            ],
+            "values": {
+                "max_iter": 1000,
+                "learning_rate": 0.10000000149011612
+            }
+        },
+        "362": {
+            "class_name": "CorrelationMatrixNode",
+            "pos": [
+                760,
+                766
+            ],
+            "values": {}
+        }
+    },
+    "links": [
+        {
+            "node_1": 145,
+            "pin_1_idx": 0,
+            "node_2": 158,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 158,
+            "pin_1_idx": 1,
+            "node_2": 171,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 171,
+            "pin_1_idx": 1,
+            "node_2": 184,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 224,
+            "pin_1_idx": 1,
+            "node_2": 238,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 184,
+            "pin_1_idx": 1,
+            "node_2": 251,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 266,
+            "pin_1_idx": 3,
+            "node_2": 289,
+            "pin_2_idx": 1
+        },
+        {
+            "node_1": 266,
+            "pin_1_idx": 5,
+            "node_2": 289,
+            "pin_2_idx": 2
+        },
+        {
+            "node_1": 289,
+            "pin_1_idx": 3,
+            "node_2": 305,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 266,
+            "pin_1_idx": 4,
+            "node_2": 305,
+            "pin_2_idx": 1
+        },
+        {
+            "node_1": 266,
+            "pin_1_idx": 6,
+            "node_2": 319,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 305,
+            "pin_1_idx": 2,
+            "node_2": 319,
+            "pin_2_idx": 1
+        },
+        {
+            "node_1": 251,
+            "pin_1_idx": 1,
+            "node_2": 210,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 210,
+            "pin_1_idx": 1,
+            "node_2": 197,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 197,
+            "pin_1_idx": 1,
+            "node_2": 224,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 238,
+            "pin_1_idx": 1,
+            "node_2": 362,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 251,
+            "pin_1_idx": 2,
+            "node_2": 362,
+            "pin_2_idx": 1
+        },
+        {
+            "node_1": 362,
+            "pin_1_idx": 2,
+            "node_2": 266,
+            "pin_2_idx": 0
+        },
+        {
+            "node_1": 362,
+            "pin_1_idx": 3,
+            "node_2": 266,
+            "pin_2_idx": 1
+        },
+        {
+            "node_1": 349,
+            "pin_1_idx": 1,
+            "node_2": 289,
+            "pin_2_idx": 0
+        }
+    ]
+}

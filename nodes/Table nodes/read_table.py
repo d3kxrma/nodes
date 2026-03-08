@@ -23,7 +23,6 @@ class ReadTableNode(Node):
             
             self.chk = dpg.add_checkbox(label="First column as index", default_value=False)
             
-            
 
     def calculate(self) -> pd.DataFrame:
         file_path = dpg.get_value(self.inp)

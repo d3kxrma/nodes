@@ -90,12 +90,16 @@ class Node(ABC):
     def get_value(self, pin_tag:int|str) -> any:
         """
         A function to get the value from a specific pin. 
-        You need to pass the tag of the pin from which you want to get the value.
-        No changes are required.
         """
         left_node = dpg.get_item_user_data(pin_tag).get("left_node")
         node_class = dpg.get_item_user_data(dpg.get_item_parent(left_node))
-        return node_class.calculate()
+        
+        result = node_class.calculate()
+        
+        if isinstance(result, dict) and left_node in result:
+            return result[left_node]
+            
+        return result
     
     @abstractmethod
     def calculate(self):
